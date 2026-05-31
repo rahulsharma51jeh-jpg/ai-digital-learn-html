@@ -1,0 +1,136 @@
+// Infinity BSEB Learn — Prisma schema
+// Dev: SQLite (zero-config). Prod: switch provider to "postgresql".
+//
+// Scaling notes:
+//  - All hot lookups (slug, classLevel, foreign keys) are indexed.
+//  - Enrollment + LessonProgress are the high-write tables; they use
+//    composite unique constraints so upserts stay idempotent.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A student/instructor/admin account.
+// NOTE: role is a String (SQLite has no native enums). Allowed values:
+// "STUDENT" | "INSTRUCTOR" | "ADMIN". On PostgreSQL this can become a real enum.
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("STUDENT")
+  // The class (1-12) the student is currently studying in. Null for staff.
+  classLevel   Int?
+  avatarUrl    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  enrollments  Enrollment[]
+  progress     LessonProgress[]
+
+  @@index([classLevel])
+}
+
+// A subject (Mathematics, Science, Hindi...) offered for a given class level.
+// The same subject name can exist across multiple class levels.
+model Subject {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  // Tailwind-friendly accent color + emoji icon for the UI.
+  colorHex    String   @default("#4f46e5")
+  icon        String   @default("📘")
+  classLevel  Int
+  createdAt   DateTime @default(now())
+
+  courses     Course[]
+
+  @@unique([classLevel, name])
+  @@index([classLevel])
+}
+
+// A course is a structured collection of video lessons within a subject.
+model Course {
+  id            String   @id @default(cuid())
+  title         String
+  slug          String   @unique
+  description   String
+  // Denormalized for fast class-level browsing without a join.
+  classLevel    Int
+  language       String  @default("Hindi")
+  level         String   @default("Beginner") // Beginner | Intermediate | Advanced
+  thumbnailUrl  String?
+  instructorName String  @default("Infinity Faculty")
+  isFeatured    Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  subjectId     String
+  subject       Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  lessons       Lesson[]
+  enrollments   Enrollment[]
+
+  @@index([classLevel])
+  @@index([subjectId])
+  @@index([isFeatured])
+}
+
+// A single video lesson. Video is sourced from YouTube (zero storage cost,
+// global CDN delivery) — we only persist the YouTube video id + metadata.
+model Lesson {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  youtubeVideoId  String   // e.g. "dQw4w9WgXcQ"
+  durationSeconds Int      @default(0)
+  order           Int      @default(0)
+  isFreePreview   Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  progress        LessonProgress[]
+
+  @@index([courseId])
+}
+
+// Join table: which student enrolled in which course.
+model Enrollment {
+  id         String   @id @default(cuid())
+  userId     String
+  courseId   String
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course     Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+}
+
+// Per-lesson watch progress for a student. High-write; upserted on the
+// composite (userId, lessonId) key so it stays idempotent.
+model LessonProgress {
+  id             String   @id @default(cuid())
+  userId         String
+  lessonId       String
+  completed      Boolean  @default(false)
+  watchedSeconds Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson         Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+  @@index([lessonId])
+}

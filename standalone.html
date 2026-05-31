@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Infinity BSEB Learn — Bihar Board Classes 1–12 (Standalone Demo)</title>
+  <meta name="description" content="Standalone single-file demo of Infinity BSEB Learn — a learning platform for Bihar Board (BSEB) students, Class 1 to 12. No install required." />
+
+  <!-- Tailwind via CDN (no build step needed) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
+              400: "#818cf8", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca",
+              800: "#3730a3", 900: "#312e81",
+            },
+            accent: { 400: "#fb923c", 500: "#f97316", 600: "#ea580c" },
+          },
+          keyframes: {
+            "fade-up": {
+              "0%": { opacity: "0", transform: "translateY(12px)" },
+              "100%": { opacity: "1", transform: "translateY(0)" },
+            },
+          },
+          animation: { "fade-up": "fade-up 0.5s ease-out both" },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .scrollbar-thin::-webkit-scrollbar { width:8px; height:8px; }
+    .scrollbar-thin::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:9999px; }
+  </style>
+</head>
+<body class="flex min-h-screen flex-col bg-slate-50 text-slate-800 antialiased">
+
+  <!-- Navbar -->
+  <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <nav class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+      <a href="#/" class="flex shrink-0 items-center gap-2">
+        <span class="grid h-9 w-9 place-items-center rounded-xl bg-brand-600 text-lg font-black text-white">∞</span>
+        <span class="text-lg font-extrabold tracking-tight text-slate-900">Infinity<span class="text-brand-600">BSEB</span></span>
+      </a>
+
+      <div class="relative hidden flex-1 px-6 lg:block">
+        <div class="relative">
+          <svg class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          <input id="search-input" autocomplete="off" placeholder="Search subjects, courses…" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 pl-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200" />
+          <div id="search-results" class="absolute left-0 right-0 top-12 z-50 hidden max-h-96 overflow-auto rounded-xl border border-slate-200 bg-white p-2 shadow-xl scrollbar-thin"></div>
+        </div>
+      </div>
+
+      <div id="nav-actions" class="hidden items-center gap-1 md:flex"></div>
+
+      <button id="mobile-toggle" aria-label="Toggle menu" class="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+      </button>
+    </nav>
+    <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white px-4 pb-4 pt-3 md:hidden"></div>
+  </header>
+
+  <!-- Main render target -->
+  <main id="app" class="flex-1"></main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-4 lg:px-8">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="grid h-8 w-8 place-items-center rounded-lg bg-brand-600 text-base font-black text-white">∞</span>
+          <span class="font-extrabold text-slate-900">Infinity<span class="text-brand-600">BSEB</span></span>
+        </div>
+        <p class="mt-3 max-w-xs text-sm text-slate-500">Concept-first learning for Bihar Board students, Class 1 to 12. Learn at your pace, track your progress, ace your boards.</p>
+      </div>
+      <div><h4 class="text-sm font-semibold text-slate-900">Learn</h4><ul class="mt-3 space-y-2 text-sm text-slate-500"><li><a class="hover:text-brand-600" href="#/classes">Browse Classes</a></li><li><a class="hover:text-brand-600" href="#/courses">All Courses</a></li><li><a class="hover:text-brand-600" href="#/class/10">Class 10 Board</a></li><li><a class="hover:text-brand-600" href="#/class/12">Class 12 Board</a></li></ul></div>
+      <div><h4 class="text-sm font-semibold text-slate-900">Account</h4><ul class="mt-3 space-y-2 text-sm text-slate-500"><li><a class="hover:text-brand-600" href="#/register">Sign up</a></li><li><a class="hover:text-brand-600" href="#/login">Log in</a></li><li><a class="hover:text-brand-600" href="#/dashboard">My Dashboard</a></li></ul></div>
+      <div><h4 class="text-sm font-semibold text-slate-900">About</h4><p class="mt-3 text-sm text-slate-500">Standalone single-file demo. State is saved in your browser (localStorage). Not affiliated with the Bihar School Examination Board.</p></div>
+    </div>
+    <div class="border-t border-slate-200 py-6"><p class="mx-auto max-w-7xl px-4 text-center text-xs text-slate-400">© <span id="year"></span> Infinity BSEB Learn — MVP demo.</p></div>
+  </footer>
+
+  <script>
+  /* ============================================================
+     Infinity BSEB Learn — Standalone single-file app
+     - No build, no server. Tailwind via CDN.
+     - Data generated in-memory (mirrors the full-stack seed).
+     - Auth / enrollment / progress persisted in localStorage.
+     ============================================================ */
+
+  // ---------- Reusable button classes ----------
+  const BTN = "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60";
+  const cls = {
+    primary: `${BTN} bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500`,
+    accent: `${BTN} bg-accent-500 text-white hover:bg-accent-600 focus:ring-accent-400`,
+    outline: `${BTN} border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-brand-500`,
+    ghost: `${BTN} text-slate-600 hover:bg-slate-100`,
+    card: "rounded-2xl border border-slate-200 bg-white shadow-sm",
+    input: "w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-200",
+    label: "mb-1.5 block text-sm font-medium text-slate-700",
+    badge: "inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium",
+  };
+
+  // ---------- Data generation (mirrors prisma/seed.ts) ----------
+  const VIDEO_POOL = ["WUvTyaaNkzM","fNk_zzaMoSs","rfscVS0vtbw","kqtD5dpn9C8","PkZNo7MFNFg","8mAITcNt710","Zot9oz0Yfp4","OmJ-4B-mS-Y","HcOc7P5BMi4","nKIu9yen5nc","rdwz7QiG0lk","lTRiuFIWV54","_uQrJ0TkZlc","yfoY53QXEnI","GwIo3gDZCVQ"];
+  const THUMBS = [
+    "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=640&q=80",
+    "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=640&q=80",
+    "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=640&q=80",
+    "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=640&q=80",
+    "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=640&q=80",
+    "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=640&q=80",
+  ];
+  const PRIMARY = [
+    { name:"Hindi", icon:"📕", colorHex:"#ef4444" }, { name:"English", icon:"📗", colorHex:"#22c55e" },
+    { name:"Mathematics", icon:"🔢", colorHex:"#4f46e5" }, { name:"Environmental Studies", icon:"🌱", colorHex:"#10b981" },
+    { name:"General Knowledge", icon:"🧠", colorHex:"#f59e0b" },
+  ];
+  const MIDDLE = [
+    { name:"Hindi", icon:"📕", colorHex:"#ef4444" }, { name:"English", icon:"📗", colorHex:"#22c55e" },
+    { name:"Mathematics", icon:"🔢", colorHex:"#4f46e5" }, { name:"Science", icon:"🔬", colorHex:"#06b6d4" },
+    { name:"Social Science", icon:"🌏", colorHex:"#f97316" }, { name:"Sanskrit", icon:"🕉️", colorHex:"#a855f7" },
+  ];
+  const SECONDARY = MIDDLE;
+  const SENIOR = [
+    { name:"Physics", icon:"⚛️", colorHex:"#4f46e5" }, { name:"Chemistry", icon:"🧪", colorHex:"#14b8a6" },
+    { name:"Biology", icon:"🧬", colorHex:"#22c55e" }, { name:"Mathematics", icon:"🔢", colorHex:"#6366f1" },
+    { name:"English", icon:"📗", colorHex:"#84cc16" }, { name:"Hindi", icon:"📕", colorHex:"#ef4444" },
+    { name:"Accountancy", icon:"📊", colorHex:"#f59e0b" }, { name:"Business Studies", icon:"💼", colorHex:"#0ea5e9" },
+    { name:"Economics", icon:"📈", colorHex:"#ec4899" },
+  ];
+  const subjectsForClass = (n) => n <= 5 ? PRIMARY : n <= 8 ? MIDDLE : n <= 10 ? SECONDARY : SENIOR;
+  const stageForClass = (n) => n <= 5 ? "Primary" : n <= 8 ? "Middle" : n <= 10 ? "Secondary" : "Senior Secondary";
+  const slugify = (...p) => p.join(" ").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+  const pick = (arr,i) => arr[i % arr.length];
+
+  // Build the catalog
+  const DB = { subjects: [], courses: [], lessonsByCourse: {} };
+  (function buildCatalog(){
+    let vc=0, tc=0, courseCount=0;
+    for (let cl=1; cl<=12; cl++){
+      for (const def of subjectsForClass(cl)){
+        const subjId = slugify(def.name,"class",cl);
+        DB.subjects.push({ id:subjId, name:def.name, slug:subjId, icon:def.icon, colorHex:def.colorHex, classLevel:cl,
+          description:`${def.name} for BSEB Class ${cl} — concept-first video lessons aligned to the Bihar Board syllabus.` });
+        const level = cl<=5 ? "Beginner" : cl<=10 ? "Intermediate" : "Advanced";
+        const isFeatured = (cl===10 || cl===12) && courseCount % 3 === 0;
+        const slug = slugify(def.name,"complete","class",cl);
+        const course = { id:slug, slug, title:`${def.name} — Complete Class ${cl}`,
+          description:`Master ${def.name} for BSEB Class ${cl}. Full chapter-wise video course with examples, board-exam tips and revision.`,
+          classLevel:cl, language: cl>=11 ? "Hinglish" : "Hindi", level, thumbnailUrl: pick(THUMBS, tc++),
+          instructorName:"Infinity Faculty", isFeatured, subject:{ name:def.name, slug:subjId, icon:def.icon, colorHex:def.colorHex } };
+        DB.courses.push(course); courseCount++;
+        const titles = ["Introduction & Syllabus Overview","Core Concepts — Part 1","Core Concepts — Part 2","Board Exam Practice & Revision"];
+        DB.lessonsByCourse[slug] = titles.map((t,i)=>({
+          id:`${slug}-l${i+1}`, title:t, description:`${def.name} (Class ${cl}) — ${t}.`,
+          youtubeVideoId: pick(VIDEO_POOL, vc++), durationSeconds: 480 + ((i*137)%900), order:i+1, isFreePreview: i===0,
+        }));
+      }
+    }
+  })();
+
+  // ---------- Persistent client state ----------
+  const store = {
+    getUser(){ try { return JSON.parse(localStorage.getItem("ibl_user")||"null"); } catch { return null; } },
+    setUser(u){ u ? localStorage.setItem("ibl_user", JSON.stringify(u)) : localStorage.removeItem("ibl_user"); },
+    enrollments(){ try { return new Set(JSON.parse(localStorage.getItem("ibl_enrollments")||"[]")); } catch { return new Set(); } },
+    saveEnrollments(set){ localStorage.setItem("ibl_enrollments", JSON.stringify([...set])); },
+    progress(){ try { return new Set(JSON.parse(localStorage.getItem("ibl_progress")||"[]")); } catch { return new Set(); } },
+    saveProgress(set){ localStorage.setItem("ibl_progress", JSON.stringify([...set])); },
+    enroll(courseId){ const s=this.enrollments(); s.add(courseId); this.saveEnrollments(s); },
+    isEnrolled(courseId){ return this.enrollments().has(courseId); },
+    setLessonDone(lessonId, done){ const s=this.progress(); done ? s.add(lessonId) : s.delete(lessonId); this.saveProgress(s); },
+    isLessonDone(lessonId){ return this.progress().has(lessonId); },
+  };
+
+  // ---------- Helpers ----------
+  const fmtDur = (s) => { const m=Math.floor(s/60), sec=s%60; return m>0 ? `${m}m ${String(sec).padStart(2,"0")}s` : `${sec}s`; };
+  const ytEmbed = (id) => `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1&playsinline=1`;
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c)=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+  const pct = (a,b) => b<=0 ? 0 : Math.round((a/b)*100);
+  const courseLessons = (slug) => DB.lessonsByCourse[slug] || [];
+  const completedInCourse = (slug) => courseLessons(slug).filter(l=>store.isLessonDone(l.id)).length;
+  const courseEnrollCount = (course) => {
+    // deterministic pseudo-count for nice UI + adjust if locally enrolled
+    let h=0; for (const ch of course.slug) h=(h*31+ch.charCodeAt(0))>>>0;
+    return (h % 900) + 50 + (store.isEnrolled(course.id) ? 1 : 0);
+  };
+
+  // ---------- Card builders ----------
+  function classCard(cl){
+    const subs = subjectsForClass(cl).length;
+    const courses = DB.courses.filter(c=>c.classLevel===cl).length;
+    return `<a href="#/class/${cl}" class="${cls.card} group flex flex-col items-start p-5 transition hover:-translate-y-1 hover:border-brand-300 hover:shadow-lg">
+      <div class="flex w-full items-center justify-between">
+        <span class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-lg font-extrabold text-brand-700">${cl}</span>
+        <span class="${cls.badge} bg-slate-100 text-slate-500">${stageForClass(cl)}</span>
+      </div>
+      <h3 class="mt-4 text-base font-bold text-slate-900 group-hover:text-brand-700">Class ${cl}</h3>
+      <p class="mt-1 text-sm text-slate-500">${subs} subjects · ${courses} courses</p>
+      <span class="mt-3 text-sm font-semibold text-brand-600 group-hover:underline">Explore →</span>
+    </a>`;
+  }
+
+  function courseCard(c){
+    const lessons = courseLessons(c.slug).length;
+    return `<a href="#/course/${c.slug}" class="${cls.card} group flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+      <div class="relative aspect-video w-full overflow-hidden" style="background-color:${c.subject.colorHex}">
+        <img src="${c.thumbnailUrl}" alt="${esc(c.title)}" class="h-full w-full object-cover opacity-90 transition group-hover:scale-105" onerror="this.style.display='none'" />
+        <span class="${cls.badge} absolute left-3 top-3 bg-white/90 text-slate-700">${c.subject.icon} ${esc(c.subject.name)}</span>
+      </div>
+      <div class="flex flex-1 flex-col p-4">
+        <div class="mb-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+          <span class="${cls.badge} bg-brand-50 text-brand-700">Class ${c.classLevel}</span>
+          <span class="${cls.badge} bg-slate-100 text-slate-600">${c.level}</span>
+          <span class="${cls.badge} bg-slate-100 text-slate-600">${c.language}</span>
+        </div>
+        <h3 class="line-clamp-2 font-semibold text-slate-900 group-hover:text-brand-700">${esc(c.title)}</h3>
+        <p class="mt-1 text-xs text-slate-500">${stageForClass(c.classLevel)} stage</p>
+        <div class="mt-auto flex items-center justify-between pt-4 text-xs text-slate-500">
+          <span class="truncate">👩‍🏫 ${esc(c.instructorName)}</span>
+          <span class="flex shrink-0 items-center gap-3"><span>🎬 ${lessons}</span><span>👥 ${courseEnrollCount(c)}</span></span>
+        </div>
+      </div>
+    </a>`;
+  }
+
+  // ---------- Pages ----------
+  function pageHome(){
+    const featured = DB.courses.filter(c=>c.isFeatured).slice(0,6);
+    const stats = { courses: DB.courses.length, lessons: Object.values(DB.lessonsByCourse).reduce((s,a)=>s+a.length,0), subjects: DB.subjects.length };
+    return `
+    <section class="relative overflow-hidden bg-gradient-to-br from-brand-700 via-brand-600 to-brand-800 text-white">
+      <div class="absolute inset-0 opacity-20" style="background:radial-gradient(circle at 20% 20%,white,transparent 40%),radial-gradient(circle at 80% 0%,white,transparent 35%)"></div>
+      <div class="relative mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-24">
+        <div class="animate-fade-up">
+          <span class="${cls.badge} bg-white/15 text-white ring-1 ring-white/25">🎓 Built for Bihar Board (BSEB) · Class 1–12</span>
+          <h1 class="mt-4 text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl">Learn smarter.<br/>Score higher in your <span class="text-accent-400">boards.</span></h1>
+          <p class="mt-4 max-w-lg text-lg text-brand-100">Concept-first video lessons, structured chapter-wise courses and progress tracking — all aligned to the BSEB syllabus. Start free, learn at your own pace.</p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#/register" class="${cls.accent} text-base">Start learning free</a>
+            <a href="#/classes" class="${BTN} bg-white/10 text-white ring-1 ring-white/30 hover:bg-white/20 text-base">Browse classes</a>
+          </div>
+          <div class="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-sm">
+            ${[[`${stats.courses}+`,"Courses"],[`${stats.lessons}+`,"Video lessons"],["12","Classes"],[`${stats.subjects}+`,"Subjects"]].map(([v,l])=>`<div><div class="text-2xl font-extrabold">${v}</div><div class="text-brand-200">${l}</div></div>`).join("")}
+          </div>
+        </div>
+        <div class="relative hidden lg:block">
+          <div class="rounded-3xl bg-white/10 p-4 ring-1 ring-white/20 backdrop-blur">
+            <div class="aspect-video rounded-2xl bg-slate-900/60 p-6">
+              <div class="flex h-full flex-col justify-between">
+                <div class="flex gap-1.5"><span class="h-3 w-3 rounded-full bg-red-400"></span><span class="h-3 w-3 rounded-full bg-yellow-400"></span><span class="h-3 w-3 rounded-full bg-green-400"></span></div>
+                <div class="space-y-3"><div class="h-3 w-3/4 rounded bg-white/30"></div><div class="h-3 w-1/2 rounded bg-white/20"></div>
+                  <div class="flex gap-2 pt-2"><span class="${cls.badge} bg-accent-500 text-white">▶ Class 10 · Science</span><span class="${cls.badge} bg-white/20 text-white">85% complete</span></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div class="grid gap-6 md:grid-cols-3">
+        ${[["🎯","Syllabus-aligned","Every course maps to the BSEB curriculum, chapter by chapter — no guesswork."],
+           ["🎬","Learn by video","Bite-sized video lessons streamed from a global CDN. Watch anywhere, on any device."],
+           ["📈","Track progress","Mark lessons complete, resume where you left off, and watch your mastery grow."]]
+          .map(([i,t,d])=>`<div class="${cls.card} p-6"><div class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-2xl">${i}</div><h3 class="mt-4 text-lg font-bold text-slate-900">${t}</h3><p class="mt-2 text-sm text-slate-600">${d}</p></div>`).join("")}
+      </div>
+    </section>
+
+    <section class="bg-white py-16">
+      <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="flex items-end justify-between gap-4">
+          <div><h2 class="text-2xl font-extrabold text-slate-900 sm:text-3xl">Choose your class</h2><p class="mt-2 max-w-2xl text-slate-600">From foundational primary years to board-exam classes — pick your grade to begin.</p></div>
+          <a href="#/classes" class="hidden shrink-0 text-sm font-semibold text-brand-600 hover:underline sm:block">View all →</a>
+        </div>
+        <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">${[1,2,3,4,5,6,7,8,9,10,11,12].map(classCard).join("")}</div>
+      </div>
+    </section>
+
+    <section class="mx-auto w-full max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div class="flex items-end justify-between gap-4">
+        <div><h2 class="text-2xl font-extrabold text-slate-900 sm:text-3xl">Featured courses</h2><p class="mt-2 max-w-2xl text-slate-600">Popular board-exam courses to kickstart your preparation.</p></div>
+        <a href="#/courses" class="hidden shrink-0 text-sm font-semibold text-brand-600 hover:underline sm:block">All courses →</a>
+      </div>
+      <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${featured.map(courseCard).join("")}</div>
+    </section>
+
+    <section class="bg-slate-900 py-16 text-white">
+      <div class="mx-auto flex w-full max-w-7xl flex-col items-center px-4 text-center sm:px-6 lg:px-8">
+        <h2 class="text-3xl font-extrabold">Ready to start learning?</h2>
+        <p class="mt-3 max-w-xl text-slate-300">Join thousands of Bihar Board students learning the smart way. It's free to begin.</p>
+        <a href="#/register" class="${cls.accent} mt-6 text-base">Create your free account</a>
+      </div>
+    </section>`;
+  }
+
+  function pageClasses(){
+    const stages = [["Primary",1,5],["Middle",6,8],["Secondary",9,10],["Senior Secondary",11,12]];
+    return `<div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <header class="mb-10"><h1 class="text-3xl font-extrabold text-slate-900">Browse by class</h1><p class="mt-2 max-w-2xl text-slate-600">Pick your grade to see every subject and course tailored to the BSEB syllabus.</p></header>
+      ${stages.map(([name,a,b])=>{
+        const items=[]; for(let cl=a;cl<=b;cl++) items.push(classCard(cl));
+        return `<section class="mb-10"><div class="mb-4 flex items-center gap-3"><h2 class="text-lg font-bold text-slate-900">${name}</h2><span class="${cls.badge} bg-slate-100 text-slate-500">Class ${a}–${b}</span></div>
+          <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">${items.join("")}</div></section>`;
+      }).join("")}
+    </div>`;
+  }
+
+  function pageClassDetail(cl){
+    cl = Number(cl);
+    if (Number.isNaN(cl) || cl<1 || cl>12) return pageNotFound();
+    const subjects = subjectsForClass(cl);
+    const courses = DB.courses.filter(c=>c.classLevel===cl);
+    return `<div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <nav class="mb-4 text-sm text-slate-500"><a href="#/classes" class="hover:text-brand-600">Classes</a><span class="mx-2">/</span><span class="text-slate-700">Class ${cl}</span></nav>
+      <header class="mb-8 flex flex-wrap items-center gap-4">
+        <span class="grid h-16 w-16 place-items-center rounded-2xl bg-brand-600 text-2xl font-black text-white">${cl}</span>
+        <div><h1 class="text-3xl font-extrabold text-slate-900">Class ${cl}</h1><p class="text-slate-500">${stageForClass(cl)} · ${subjects.length} subjects · ${courses.length} courses</p></div>
+      </header>
+      <section class="mb-12"><h2 class="mb-4 text-lg font-bold text-slate-900">Subjects</h2>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        ${subjects.map(s=>`<div class="${cls.card} flex items-center gap-3 p-4" style="border-left:4px solid ${s.colorHex}"><span class="text-2xl">${s.icon}</span><div class="min-w-0"><p class="truncate font-semibold text-slate-900">${esc(s.name)}</p><p class="text-xs text-slate-500">1 course</p></div></div>`).join("")}
+        </div></section>
+      <section><h2 class="mb-4 text-lg font-bold text-slate-900">Courses</h2>
+        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${courses.map(courseCard).join("")}</div></section>
+    </div>`;
+  }
+
+  function pageCourses(params){
+    const sel = params.get("class") ? Number(params.get("class")) : null;
+    const valid = sel && sel>=1 && sel<=12 ? sel : null;
+    const courses = valid ? DB.courses.filter(c=>c.classLevel===valid) : DB.courses;
+    const chip = (label, href, active) => `<a href="${href}" class="${cls.badge} px-3 py-1.5 text-sm ${active?"bg-brand-600 text-white":"bg-white text-slate-600 ring-1 ring-slate-200 hover:ring-brand-300"}">${label}</a>`;
+    return `<div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <header class="mb-8"><h1 class="text-3xl font-extrabold text-slate-900">All courses</h1><p class="mt-2 text-slate-600">${courses.length} courses ${valid?`for Class ${valid}`:"across all classes"}.</p></header>
+      <div class="mb-8 flex flex-wrap gap-2">${chip("All","#/courses",!valid)}${[1,2,3,4,5,6,7,8,9,10,11,12].map(c=>chip(`Class ${c}`,`#/courses?class=${c}`,valid===c)).join("")}</div>
+      <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">${courses.map(courseCard).join("")}</div>
+    </div>`;
+  }
+
+  function pageCourseDetail(slug){
+    const c = DB.courses.find(x=>x.slug===slug);
+    if (!c) return pageNotFound();
+    const lessons = courseLessons(slug);
+    const total = lessons.reduce((s,l)=>s+l.durationSeconds,0);
+    const enrolled = store.isEnrolled(c.id);
+    const user = store.getUser();
+
+    const enrollBtn = !user
+      ? `<a href="#/login?next=${encodeURIComponent("#/course/"+slug)}" class="${cls.primary} w-full text-base">Log in to enroll</a>`
+      : enrolled
+        ? `<a href="#/learn/${slug}" class="${cls.accent} w-full text-base">▶ Continue learning</a>`
+        : `<button data-enroll="${c.id}" data-slug="${slug}" class="${cls.primary} w-full text-base">Enroll for free</button>`;
+
+    return `<div>
+      <div class="bg-slate-900 text-white"><div class="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <nav class="mb-4 text-sm text-slate-400"><a href="#/class/${c.classLevel}" class="hover:text-white">Class ${c.classLevel}</a><span class="mx-2">/</span><span class="text-slate-200">${esc(c.subject.name)}</span></nav>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="${cls.badge} bg-brand-600 text-white">${c.subject.icon} ${esc(c.subject.name)}</span>
+          <span class="${cls.badge} bg-white/10 text-white">Class ${c.classLevel}</span>
+          <span class="${cls.badge} bg-white/10 text-white">${c.level}</span>
+          <span class="${cls.badge} bg-white/10 text-white">${c.language}</span>
+        </div>
+        <h1 class="mt-4 max-w-3xl text-3xl font-extrabold sm:text-4xl">${esc(c.title)}</h1>
+        <p class="mt-3 max-w-2xl text-slate-300">${esc(c.description)}</p>
+        <div class="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-300"><span>👩‍🏫 ${esc(c.instructorName)}</span><span>🎬 ${lessons.length} lessons</span><span>⏱ ${fmtDur(total)} total</span><span>👥 ${courseEnrollCount(c)} enrolled</span></div>
+      </div></div>
+
+      <div class="mx-auto grid w-full max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1fr_360px] lg:px-8">
+        <section>
+          <h2 class="text-xl font-bold text-slate-900">Course curriculum</h2>
+          <p class="mt-1 text-sm text-slate-500">${lessons.length} lessons · ${stageForClass(c.classLevel)} stage</p>
+          <ul class="mt-5 space-y-2">${lessons.map(l=>{
+            const done = store.isLessonDone(l.id);
+            const locked = !enrolled && !l.isFreePreview;
+            return `<li class="${cls.card} flex items-center gap-4 p-4">
+              <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full text-sm font-semibold ${done?"bg-green-100 text-green-700":"bg-brand-50 text-brand-700"}">${done?"✓":l.order}</span>
+              <div class="min-w-0 flex-1"><p class="truncate font-medium text-slate-900">${esc(l.title)}</p><p class="text-xs text-slate-500">${fmtDur(l.durationSeconds)}</p></div>
+              ${l.isFreePreview?`<span class="${cls.badge} bg-accent-500 text-white">Free preview</span>`:""}
+              ${locked?`<span class="text-slate-300">🔒</span>`:""}
+            </li>`;
+          }).join("")}</ul>
+        </section>
+        <aside class="lg:sticky lg:top-24 lg:self-start">
+          <div class="${cls.card} overflow-hidden">
+            <div class="aspect-video w-full" style="background-color:${c.subject.colorHex}"><img src="${c.thumbnailUrl}" alt="${esc(c.title)}" class="h-full w-full object-cover" onerror="this.style.display='none'"/></div>
+            <div class="space-y-4 p-5">
+              <div class="text-center"><span class="text-2xl font-extrabold text-slate-900">Free</span><p class="text-xs text-slate-500">Full access · no payment required</p></div>
+              ${enrollBtn}
+              <ul class="space-y-2 pt-2 text-sm text-slate-600"><li>✅ ${lessons.length} video lessons</li><li>✅ Learn at your own pace</li><li>✅ Progress tracking</li><li>✅ Works on mobile</li></ul>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>`;
+  }
+
+  function pageLearn(slug){
+    const user = store.getUser();
+    if (!user) { location.hash = `#/login?next=${encodeURIComponent("#/learn/"+slug)}`; return ""; }
+    const c = DB.courses.find(x=>x.slug===slug);
+    if (!c) return pageNotFound();
+    if (!store.isEnrolled(c.id)) { location.hash = `#/course/${slug}`; return ""; }
+    const lessons = courseLessons(slug);
+    const activeId = (router.query && router.query.get("lesson")) || lessons[0].id;
+    const active = lessons.find(l=>l.id===activeId) || lessons[0];
+    const done = completedInCourse(slug);
+    const progress = pct(done, lessons.length);
+    const isActiveDone = store.isLessonDone(active.id);
+
+    return `<div class="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <div class="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <div>
+          <div class="relative aspect-video w-full overflow-hidden rounded-2xl bg-black shadow">
+            <iframe class="absolute inset-0 h-full w-full" src="${ytEmbed(active.youtubeVideoId)}" title="${esc(active.title)}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen loading="lazy"></iframe>
+          </div>
+          <div class="mt-5 flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-semibold uppercase tracking-wide text-brand-600">Lesson ${active.order}</p>
+              <h1 class="mt-1 text-xl font-bold text-slate-900">${esc(active.title)}</h1>
+              <p class="mt-2 max-w-2xl text-sm text-slate-600">${esc(active.description||"")}</p>
+            </div>
+            <div class="flex shrink-0 gap-2">
+              <button data-toggle-lesson="${active.id}" data-slug="${slug}" data-value="${isActiveDone?"false":"true"}" class="${isActiveDone?cls.outline:cls.primary}">${isActiveDone?"✓ Completed":"Mark complete"}</button>
+            </div>
+          </div>
+        </div>
+        <aside class="${cls.card} h-fit overflow-hidden">
+          <div class="border-b border-slate-200 p-4">
+            <a href="#/course/${slug}" class="text-xs text-slate-400 hover:text-brand-600">← Back to course</a>
+            <h2 class="mt-1 line-clamp-2 font-bold text-slate-900">${esc(c.title)}</h2>
+            <div class="mt-3"><div class="flex items-center justify-between text-xs text-slate-500"><span>${done} / ${lessons.length} lessons</span><span class="font-semibold text-brand-600">${progress}%</span></div>
+              <div class="mt-1 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-brand-600 transition-all" style="width:${progress}%"></div></div></div>
+          </div>
+          <ul class="max-h-[60vh] divide-y divide-slate-100 overflow-auto scrollbar-thin">
+            ${lessons.map(l=>{
+              const d = store.isLessonDone(l.id); const isA = l.id===active.id;
+              return `<li><a href="#/learn/${slug}?lesson=${l.id}" class="flex w-full items-center gap-3 px-4 py-3 text-left transition ${isA?"bg-brand-50":"hover:bg-slate-50"}">
+                <span class="grid h-6 w-6 shrink-0 place-items-center rounded-full border text-xs font-semibold ${d?"border-green-500 bg-green-500 text-white":isA?"border-brand-500 text-brand-600":"border-slate-300 text-slate-400"}">${d?"✓":l.order}</span>
+                <span class="min-w-0 flex-1"><span class="block truncate text-sm ${isA?"font-semibold text-brand-700":"text-slate-700"}">${esc(l.title)}</span><span class="text-xs text-slate-400">${fmtDur(l.durationSeconds)}</span></span>
+              </a></li>`;
+            }).join("")}
+          </ul>
+        </aside>
+      </div>
+    </div>`;
+  }
+
+  function pageDashboard(){
+    const user = store.getUser();
+    if (!user) { location.hash = `#/login?next=${encodeURIComponent("#/dashboard")}`; return ""; }
+    const enrolledIds = store.enrollments();
+    const enrolled = DB.courses.filter(c=>enrolledIds.has(c.id));
+    const totalLessons = enrolled.reduce((s,c)=>s+courseLessons(c.slug).length,0);
+    const completedLessons = enrolled.reduce((s,c)=>s+completedInCourse(c.slug),0);
+    const inProgress = enrolled.filter(c=>{ const p=pct(completedInCourse(c.slug),courseLessons(c.slug).length); return p>0&&p<100; }).length;
+    const statCard = (l,v,i)=>`<div class="${cls.card} flex items-center gap-4 p-5"><span class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-2xl">${i}</span><div><div class="text-2xl font-extrabold text-slate-900">${v}</div><div class="text-sm text-slate-500">${l}</div></div></div>`;
+
+    const cards = enrolled.length===0
+      ? `<div class="${cls.card} flex flex-col items-center p-12 text-center"><span class="text-5xl">🚀</span><h3 class="mt-4 text-lg font-bold text-slate-900">No courses yet</h3><p class="mt-1 max-w-sm text-slate-500">Explore courses for your class and enroll to start learning.</p><a href="#/courses" class="${cls.primary} mt-5">Browse courses</a></div>`
+      : `<div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">${enrolled.map(c=>{
+          const tot=courseLessons(c.slug).length, dn=completedInCourse(c.slug), p=pct(dn,tot);
+          return `<a href="#/learn/${c.slug}" class="${cls.card} group flex flex-col overflow-hidden transition hover:-translate-y-1 hover:shadow-lg">
+            <div class="relative aspect-video w-full" style="background-color:${c.subject.colorHex}"><img src="${c.thumbnailUrl}" class="h-full w-full object-cover" onerror="this.style.display='none'"/><span class="${cls.badge} absolute left-3 top-3 bg-white/90 text-slate-700">Class ${c.classLevel}</span></div>
+            <div class="flex flex-1 flex-col p-4"><h3 class="line-clamp-2 font-semibold text-slate-900 group-hover:text-brand-700">${esc(c.title)}</h3>
+              <div class="mt-auto pt-4"><div class="flex items-center justify-between text-xs text-slate-500"><span>${dn} / ${tot} lessons</span><span class="font-semibold text-brand-600">${p}%</span></div>
+                <div class="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-brand-600 transition-all" style="width:${p}%"></div></div>
+                <span class="mt-3 inline-block text-sm font-semibold text-brand-600 group-hover:underline">${p===0?"Start learning →":p===100?"Review →":"Continue →"}</span></div>
+            </div></a>`;
+        }).join("")}</div>`;
+
+    return `<div class="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+      <header class="mb-8"><h1 class="text-3xl font-extrabold text-slate-900">Hi, ${esc((user.name||"there").split(" ")[0])} 👋</h1><p class="mt-1 text-slate-600">${user.classLevel?`Class ${user.classLevel} · `:""}Keep up the momentum.</p></header>
+      <div class="mb-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">${statCard("Enrolled courses",enrolled.length,"📚")}${statCard("In progress",inProgress,"⏳")}${statCard("Lessons completed",completedLessons,"✅")}${statCard("Total lessons",totalLessons,"🎬")}</div>
+      <h2 class="mb-4 text-xl font-bold text-slate-900">My courses</h2>${cards}
+    </div>`;
+  }
+
+  function pageAuth(mode, params){
+    const isReg = mode==="register";
+    const classOpts = Array.from({length:12},(_,i)=>`<option value="${i+1}">Class ${i+1}</option>`).join("");
+    const next = (params && params.get("next")) || "#/dashboard";
+    return `<div class="mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-7xl items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <div class="w-full max-w-md">
+        <div class="mb-6 text-center"><a href="#/" class="inline-flex"><span class="grid h-10 w-10 place-items-center rounded-xl bg-brand-600 text-xl font-black text-white">∞</span></a>
+          <h1 class="mt-4 text-2xl font-extrabold text-slate-900">${isReg?"Create your account":"Welcome back"}</h1>
+          <p class="mt-1 text-slate-500">${isReg?"Start learning for free — no credit card needed.":"Log in to continue learning."}</p></div>
+        <div class="${cls.card} p-6 sm:p-8">
+          <form id="auth-form" data-mode="${mode}" data-next="${esc(next)}" class="space-y-4">
+            ${isReg?`<div><label class="${cls.label}">Full name</label><input name="name" class="${cls.input}" placeholder="Aarav Kumar" required/></div>`:""}
+            <div><label class="${cls.label}">Email</label><input name="email" type="email" class="${cls.input}" placeholder="you@example.com" required/></div>
+            <div><label class="${cls.label}">Password</label><input name="password" type="password" class="${cls.input}" placeholder="${isReg?"At least 8 characters":"••••••••"}" required/></div>
+            ${isReg?`<div><label class="${cls.label}">Your class (optional)</label><select name="classLevel" class="${cls.input}"><option value="">Select your class</option>${classOpts}</select></div>`:""}
+            <div id="auth-error" class="hidden rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700"></div>
+            <button type="submit" class="${cls.primary} w-full text-base">${isReg?"Create account":"Log in"}</button>
+            <p class="text-center text-sm text-slate-500">${isReg?`Already have an account? <a href="#/login" class="font-semibold text-brand-600 hover:underline">Log in</a>`:`New to Infinity BSEB? <a href="#/register" class="font-semibold text-brand-600 hover:underline">Create account</a>`}</p>
+          </form>
+        </div>
+        ${!isReg?`<div class="mt-4 rounded-xl bg-brand-50 p-4 text-center text-sm text-brand-800"><p class="font-semibold">Demo</p><p class="mt-1">Use any email + password — this standalone demo stores your session locally.</p></div>`:""}
+      </div>
+    </div>`;
+  }
+
+  function pageNotFound(){
+    return `<div class="mx-auto flex min-h-[60vh] w-full max-w-7xl flex-col items-center justify-center px-4 text-center">
+      <span class="text-6xl font-black text-brand-600">∞</span><h1 class="mt-4 text-3xl font-extrabold text-slate-900">Page not found</h1>
+      <p class="mt-2 text-slate-500">The page you're looking for doesn't exist.</p><a href="#/" class="${cls.primary} mt-6">Back to home</a></div>`;
+  }
+
+  // ---------- Router ----------
+  const router = { query: null };
+  function parseHash(){
+    const raw = location.hash.replace(/^#/, "") || "/";
+    const [path, qs] = raw.split("?");
+    return { segments: path.split("/").filter(Boolean), query: new URLSearchParams(qs || "") };
+  }
+
+  function render(){
+    const { segments, query } = parseHash();
+    router.query = query;
+    const root = document.getElementById("app");
+    let html = "";
+
+    switch (segments[0]) {
+      case undefined: html = pageHome(); break;
+      case "classes": html = pageClasses(); break;
+      case "class": html = pageClassDetail(segments[1]); break;
+      case "courses": html = pageCourses(query); break;
+      case "course": html = pageCourseDetail(segments[1]); break;
+      case "learn": html = pageLearn(segments[1]); break;
+      case "dashboard": html = pageDashboard(); break;
+      case "login": html = pageAuth("login", query); break;
+      case "register": html = pageAuth("register", query); break;
+      default: html = pageNotFound();
+    }
+
+    root.innerHTML = html;
+    renderNav();
+    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+  }
+
+  function renderNav(){
+    const user = store.getUser();
+    const actions = document.getElementById("nav-actions");
+    const mobile = document.getElementById("mobile-menu");
+    const links = `<a href="#/classes" class="${cls.ghost}">Classes</a><a href="#/courses" class="${cls.ghost}">Courses</a>`;
+    if (user) {
+      actions.innerHTML = `${links}<a href="#/dashboard" class="${cls.ghost}">Dashboard</a>
+        <span class="mx-1 hidden text-sm text-slate-400 lg:inline">|</span>
+        <span class="hidden max-w-[8rem] truncate text-sm font-medium text-slate-700 lg:inline">${esc(user.name||user.email)}</span>
+        <button id="logout-btn" class="${cls.outline}">Log out</button>`;
+      mobile.innerHTML = `<div class="flex flex-col gap-1">${links.replaceAll(cls.ghost, cls.ghost+" justify-start")}<a href="#/dashboard" class="${cls.ghost} justify-start">Dashboard</a><button id="logout-btn-m" class="${cls.outline} mt-1 justify-start">Log out</button></div>`;
+    } else {
+      actions.innerHTML = `${links}<a href="#/login" class="${cls.ghost}">Log in</a><a href="#/register" class="${cls.primary}">Get started</a>`;
+      mobile.innerHTML = `<div class="flex flex-col gap-1">${links.replaceAll(cls.ghost, cls.ghost+" justify-start")}<a href="#/login" class="${cls.outline} mt-1">Log in</a><a href="#/register" class="${cls.primary}">Get started</a></div>`;
+    }
+  }
+
+  // ---------- Global event delegation ----------
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("[data-enroll],[data-toggle-lesson],#logout-btn,#logout-btn-m");
+    if (!t) {
+      // close mobile menu on nav link click
+      if (e.target.closest("#mobile-menu a")) document.getElementById("mobile-menu").classList.add("hidden");
+      return;
+    }
+    if (t.id === "logout-btn" || t.id === "logout-btn-m") { store.setUser(null); location.hash = "#/"; render(); return; }
+    if (t.dataset.enroll) { store.enroll(t.dataset.enroll); location.hash = `#/learn/${t.dataset.slug}`; return; }
+    if (t.dataset.toggleLesson) {
+      store.setLessonDone(t.dataset.toggleLesson, t.dataset.value === "true");
+      render();
+      return;
+    }
+  });
+
+  document.addEventListener("submit", (e) => {
+    if (e.target.id !== "auth-form") return;
+    e.preventDefault();
+    const f = e.target;
+    const fd = new FormData(f);
+    const email = (fd.get("email")||"").toString().trim();
+    const password = (fd.get("password")||"").toString();
+    const errBox = document.getElementById("auth-error");
+    if (!email || password.length < (f.dataset.mode==="register"?8:1)) {
+      errBox.textContent = f.dataset.mode==="register" ? "Password must be at least 8 characters." : "Enter your email and password.";
+      errBox.classList.remove("hidden");
+      return;
+    }
+    store.setUser({
+      name: (fd.get("name")||email.split("@")[0]).toString(),
+      email,
+      classLevel: fd.get("classLevel") ? Number(fd.get("classLevel")) : null,
+    });
+    location.hash = f.dataset.next || "#/dashboard";
+    render();
+  });
+
+  // Mobile menu toggle
+  document.getElementById("mobile-toggle").addEventListener("click", () => {
+    document.getElementById("mobile-menu").classList.toggle("hidden");
+  });
+
+  // ---------- Search ----------
+  const searchInput = document.getElementById("search-input");
+  const searchResults = document.getElementById("search-results");
+  let searchTimer;
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    const q = searchInput.value.trim().toLowerCase();
+    if (q.length < 2) { searchResults.classList.add("hidden"); return; }
+    searchTimer = setTimeout(() => {
+      const subs = DB.subjects.filter(s=>s.name.toLowerCase().includes(q)).slice(0,6);
+      const crs = DB.courses.filter(c=>c.title.toLowerCase().includes(q)||c.subject.name.toLowerCase().includes(q)).slice(0,8);
+      if (subs.length===0 && crs.length===0) { searchResults.classList.add("hidden"); return; }
+      searchResults.innerHTML =
+        (subs.length?`<p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Subjects</p>`+subs.map(s=>`<a href="#/class/${s.classLevel}" class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-slate-50"><span>${s.icon}</span><span class="font-medium text-slate-700">${esc(s.name)}</span><span class="ml-auto text-xs text-slate-400">Class ${s.classLevel}</span></a>`).join(""):"")+
+        (crs.length?`<p class="px-2 py-1 text-xs font-semibold uppercase tracking-wide text-slate-400">Courses</p>`+crs.map(c=>`<a href="#/course/${c.slug}" class="flex items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-slate-50"><span class="font-medium text-slate-700">${esc(c.title)}</span><span class="ml-auto text-xs text-slate-400">Class ${c.classLevel}</span></a>`).join(""):"");
+      searchResults.classList.remove("hidden");
+    }, 200);
+  });
+  document.addEventListener("mousedown", (e) => {
+    if (!searchResults.contains(e.target) && e.target !== searchInput) searchResults.classList.add("hidden");
+  });
+  searchResults.addEventListener("click", () => { searchResults.classList.add("hidden"); searchInput.value = ""; });
+
+  // ---------- Boot ----------
+  document.getElementById("year").textContent = new Date().getFullYear();
+  window.addEventListener("hashchange", render);
+  render();
+  </script>
+</body>
+</html>
